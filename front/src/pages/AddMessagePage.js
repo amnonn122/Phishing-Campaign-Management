@@ -33,6 +33,18 @@ function AddMessagePage() {
           />
         </div>
         <div style={{ marginBottom: '10px' }}>
+          <label htmlFor="messageType" style={{ display: 'block', marginBottom: '5px' }}>Message Title:</label>
+          <input
+            type="text"
+            id="messageType"
+            value={messageType}
+            onChange={(e) => setMessageType(e.target.value)}
+            placeholder="Enter message title..."
+            required
+            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+          />
+        </div>
+        <div style={{ marginBottom: '10px' }}>
           <label htmlFor="messageContent" style={{ display: 'block', marginBottom: '5px' }}>Message Content:</label>
           <textarea
             id="messageContent"
