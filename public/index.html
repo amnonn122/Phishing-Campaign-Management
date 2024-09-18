@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Campaign Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #243447;
+            margin: 0;
+            padding: 20px;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #1B2836;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+        }
+        .flex {
+            display: flex;
+            justify-content: space-between;
+        }
+        .box {
+            background-color: #4a6f8d;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px;
+            flex: 1;
+            color: #ffffff;
+        }
+        .btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .dropdown {
+            margin: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #ffffff;
+            color: #000;
+        }
+        select[multiple] {
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phishing Campaign Management</h1>
+
+        <div class="flex">
+            <div class="box">
+                <button class="btn" onclick="goToAddMessageType()">Add Message Type</button>
+            </div>
+            <div class="box">
+                <button class="btn" onclick="sendLog('View history')">Message History</button>
+            </div>
+        </div>
+
+        <div class="box">
+            <h3>Users who fell for the last message:</h3>
+            <p>No data available yet.</p>
+        </div>
+
+        <div class="box flex">
+            <div>
+                <label for="recipient">Select recipients for message:</label>
+                <select id="recipient" class="dropdown" multiple size="3" onchange="sendLog('Recipients selected')">
+                    <option value="bar">Bar</option>
+                    <option value="everyone">Everyone</option>
+                    <option value="amnon">Amnon</option>
+                </select>
+            </div>
+            <div>
+                <button class="btn" onclick="goToMessageDesign()">Go to Message Design</button>
+            </div>
+        </div>
+
+        <button class="btn" onclick="signOut()">Sign Out</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function sendLog(action) {
+            socket.emit('logMessage', action);
+        }
+
+        function goToMessageDesign() {
+            const recipients = Array.from(document.getElementById('recipient').selectedOptions).map(option => option.text);
+            localStorage.setItem('selectedRecipients', JSON.stringify(recipients));
+            window.location.href = 'message-design.html';
+        }
+
+        function goToAddMessageType() {
+            const recipients = Array.from(document.getElementById('recipient').selectedOptions).map(option => option.text);
+            localStorage.setItem('selectedRecipients', JSON.stringify(recipients));
+            window.location.href = 'addMessage.html';
+        }
+
+        function signOut() {
+            sendLog('User signed out');
+            window.close();
+        }
+    </script>
+</body>
+</html>
