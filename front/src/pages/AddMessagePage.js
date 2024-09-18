@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function AddMessagePage() {
   const [messageType, setMessageType] = useState('');
+  const [messageTitle, setMessageTitle] = useState('');
   const [messageContent, setMessageContent] = useState('');
 
   const submitMessage = (e) => {
@@ -9,11 +10,13 @@ function AddMessagePage() {
     const newWindow = window.open("", "_blank", "width=400,height=300");
     newWindow.document.write(`<h1 style="font-family: Arial; color: #2c3e50;">Message Summary</h1>`);
     newWindow.document.write(`<p><strong>Message Type:</strong> ${messageType}</p>`);
+    newWindow.document.write(`<p><strong>Message Title:</strong> ${messageTitle}</p>`);
     newWindow.document.write(`<p><strong>Message Content:</strong> ${messageContent}</p>`);
 
     // ניקוי שדות לאחר שליחה
     setMessageType('');
     setMessageContent('');
+    setMessageTitle('');
   };
 
   return (
@@ -33,12 +36,12 @@ function AddMessagePage() {
           />
         </div>
         <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="messageType" style={{ display: 'block', marginBottom: '5px' }}>Message Title:</label>
+          <label htmlFor="messageTitle" style={{ display: 'block', marginBottom: '5px' }}>Message Title:</label>
           <input
             type="text"
-            id="messageType"
-            value={messageType}
-            onChange={(e) => setMessageType(e.target.value)}
+            id="messageTitle"
+            value={messageTitle}
+            onChange={(e) => setMessageTitle(e.target.value)}
             placeholder="Enter message title..."
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
@@ -52,7 +55,7 @@ function AddMessagePage() {
             onChange={(e) => setMessageContent(e.target.value)}
             placeholder="Enter message content..."
             required
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box', height: '120px' }} // גובה מותאם ל-4 שורות לפחות
+            style={{ width: '100%', padding: '8px', boxSizing: 'border-box', height: '120px' }}
           />
         </div>
         <button type="submit" style={{ padding: '10px 20px', cursor: 'pointer' }}>Submit and Open Message</button>
