@@ -53,3 +53,6 @@ def setDB(employee_data):
 
     # Print a success message
     print(f"Inserted {len(employee_records)} employee records into the database.")
+
+def newa(employee_data):
+    print "1"
