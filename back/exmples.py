@@ -25,15 +25,20 @@ password = "aoamngkprfukvoif"
 email_list = ["barsh2001@gmail.com"]
 subject = ""
 body = "";
-sendEmail.send_email_to_list(from_email, password, email_list, subject, body)
+message_data = (
+    "Alert",
+    lambda name: f"Please be cautious of phishing attempts, {name}.",
+    "fish2"
+)
+
+sendMessagesToEmployees(message_data)
 
 
 
 
 
 
-
-from dbConnect import setDB
+from dbConnect import setDB, sendMessagesToEmployees
 
 # Example usage
 employees = [

@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from back.dbConnect import getMessagesForEmployees, connect_db
+from dbConnect import getMessagesForEmployees, connect_db
 
 
 # Function to email a single recipient
@@ -33,7 +33,7 @@ def send_email_to_one(server, from_email, to_email, subject, body):
 
 
 # Send emails to a list of employees with personalized messages
-def send_emails_to_employees(employee_names, from_email, password):
+def send_emails_to_employees(message_data, employee_data, from_email, password):
     try:
         # Connect to Gmail server
         server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -42,28 +42,15 @@ def send_emails_to_employees(employee_names, from_email, password):
         # Login with the given email and password
         server.login(from_email, password)
 
-        # Fetch employees and messages collections from MongoDB
-        employees_collection, messages_collection = connect_db()
+        title, content_template, message_type = message_data
 
         # Send an email to each employee with their personalized message
-        for name in employee_names:
-            # Fetch employee details
-            employee = employees_collection.find_one({"name": name})
-            if not employee:
-                print(f"Employee '{name}' not found in the database.")
-                continue
+        for name, email in employee_data:
+            # Replace {name} in the content template with the actual employee name
+            personalized_content = content_template.replace("{name}", name)
 
-            employee_email = employee.get("email")
-
-            # Fetch all messages from the database
-            messages = messages_collection.find()
-
-            for message in messages:
-                title = message.get("title")
-                content = message.get("content").replace("{name}", name)  # Personalize the content
-
-                # Send the personalized email
-                send_email_to_one(server, from_email, employee_email, title, content)
+            # Send the personalized email
+            send_email_to_one(server, from_email, email, title, personalized_content)
 
         # Disconnect from the server after all emails are sent
         server.quit()
