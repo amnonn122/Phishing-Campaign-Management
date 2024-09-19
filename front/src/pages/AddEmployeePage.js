@@ -1,21 +1,34 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // ייבוא useNavigate
 
 function AddEmployeePage() {
-  // יצירת state עבור שם ואימייל
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [error, setError] = useState(null);
 
-  // פונקציה לטיפול במשלוח הטופס
-  const handleSubmit = (e) => {
+  const navigate = useNavigate(); // יצירת משתנה ניווט
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // הודעה עם הפרטים
-    alert(`Employee added: \nName: ${name}\nEmail: ${email}`);
+    try {
+      // שליחה לשרת Flask בכתובת הנכונה
+      const response = await axios.post('http://localhost:5000/employees', { name, email });
 
-    // ניתן גם לשלוח את הנתונים לשרת או להוסיף אותם לרשימה
-    // ניקוי השדות לאחר ההוספה
-    setName('');
-    setEmail('');
+      alert('Employee added successfully');
+
+      // ניקוי השדות לאחר ההוספה
+      setName('');
+      setEmail('');
+      setError(null);
+
+      // ניווט ל-HomePage אחרי הוספה מוצלחת
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+      setError(error.response?.data?.message || 'Failed to add employee');
+    }
   };
 
   return (
@@ -45,6 +58,7 @@ function AddEmployeePage() {
           />
         </div>
         <button type="submit" style={{ padding: '10px 20px', cursor: 'pointer' }}>Add Employee</button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </form>
     </div>
   );

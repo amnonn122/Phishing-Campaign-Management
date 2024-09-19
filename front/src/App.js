@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage.js';
 import AddMessagePage from './pages/AddMessagePage.js';
 import MessageDesignPage from './pages/MessageDesignPage.js';
-import AddEmployeePage from './pages/AddEmployeePage.js';
+import AddEmployeePage from './pages/AddEmployeePage';
 import WhoFellPage from './pages/WhoFellPage.js';
 
 function App() {
