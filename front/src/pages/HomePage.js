@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // ייבוא axios
 import './homepage.css';
 
 function HomePage() {
@@ -20,25 +21,26 @@ function HomePage() {
     navigate('/add-message');
   };
 
-  // State to manage selected recipients
+  // State to manage selected recipients and recipients fetched from the API
   const [selectedRecipients, setSelectedRecipients] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [recipients, setRecipients] = useState([]); // State עבור רשימת העובדים
 
-  // List of available recipients
-  const recipients = [
-    { value: 'bar', label: 'Bar' },
-    { value: 'amnon', label: 'Amnon' },
-    { value: 'john', label: 'John' },
-    { value: 'jane', label: 'Jane' },
-    { value: 'jane', label: 'Jane' },
-    { value: 'jane', label: 'Jane' },
-    { value: 'amnon', label: 'Amnon' },
-    { value: 'amnon', label: 'Amnon' },
-    { value: 'amnon', label: 'Amnon' },
-
-
-    // Add more recipients as needed
-  ];
+  // שימוש ב-useEffect כדי למשוך את שמות העובדים מה-DB כאשר הקומפוננטה נטענת
+  useEffect(() => {
+    // שליפת הנתונים מה-API
+    axios.get('http://localhost:5000/employees') // הנח שה-API שלך רץ על פורט 5000
+      .then(response => {
+        const employees = response.data.map(employee => ({
+          value: employee.name,
+          label: employee.name
+        }));
+        setRecipients(employees); // עדכון ה-state עם רשימת העובדים
+      })
+      .catch(error => {
+        console.error('Error fetching employees:', error);
+      });
+  }, []); // הפונקציה תורץ פעם אחת כשיש טעינה
 
   const handleRecipientChange = (event) => {
     const { options } = event.target;
@@ -65,7 +67,6 @@ function HomePage() {
     localStorage.setItem('selectedRecipients', JSON.stringify(selectedRecipients));
     navigate('/message-design');
   };
-
 
   return (
     <div className="container">
