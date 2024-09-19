@@ -34,7 +34,7 @@ def setDB(employee_data, message_data):
     employee_data (list of list): A 2D array where each inner list contains
                                   two strings: employee name and email.
     message_data (list of tuple): A list of tuples where each tuple contains
-                                   the message title and a function that generates the content.
+                                  the message title, content function, and message type.
     """
     # Step 1: Connect to MongoDB (assuming it's running locally)
     client = MongoClient("mongodb://localhost:27017/")
@@ -63,16 +63,21 @@ def setDB(employee_data, message_data):
     # Step 8: Clear any existing data in the 'messages' collection (optional)
     message_collection.delete_many({})
 
-    # Step 9: Prepare and insert message data into MongoDB
+    # Step 9: Prepare and insert message data into MongoDB with the placeholder {name}
     message_records = []
-    for title, content_function in message_data:
-        for name, _ in employee_data:
-            content = content_function(name)  # Pass employee name to the content function
-            message_records.append({"title": title, "content": content})
+    for title, content_function, message_type in message_data:
+        # Store the content template with {name} as the placeholder
+        content_template = content_function("{name}")
+        message_records.append({
+            "title": title,
+            "content_template": content_template,  # Store the template with the placeholder
+            "message_type": message_type  # Store the provided message type
+        })
 
     # Step 10: Insert the records into the 'messages' collection
     message_collection.insert_many(message_records)
     print(f"Inserted {len(message_records)} message records into the 'messages' collection.")
+
 
 
 def increment_phishing_count(name):
@@ -156,3 +161,55 @@ def getMessagesForEmployees(employee_names):
         result.append([employee_name, personalized_messages])
 
     return result
+
+
+def generate_message(employee_name, message_template):
+    """
+    Replace the {name} placeholder in the message template with the actual employee name.
+
+    Parameters:
+    employee_name (str): The name of the employee.
+    message_template (str): The message template with a {name} placeholder.
+
+    Returns:
+    str: The personalized message.
+    """
+    return message_template.replace("{name}", employee_name)
+
+
+def getMessageAndEmployeeData(user_names, message_types):
+    """
+    Retrieve message data and employee data from the database based on user names and message types.
+
+    Parameters:
+    user_names (list of str): List of unique user names.
+    message_types (list of str): List of unique message types.
+
+    Returns:
+    tuple: (message_data, employee_data) where
+           - message_data is a tuple containing the message title, content template, and message type.
+           - employee_data is a list of tuples containing employee name and email.
+    """
+    # Step 1: Connect to MongoDB (assuming it's running locally)
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['companyDB']
+
+    # Step 2: Fetch employee data based on user names
+    employee_collection = db['employees']
+    employee_records = employee_collection.find({"name": {"$in": user_names}}, {"_id": 0, "name": 1, "email": 1})
+    employee_data = [(record['name'], record['email']) for record in employee_records]
+
+    # Step 3: Fetch message data based on message types
+    message_collection = db['messages']
+    message_record = message_collection.find_one({"message_type": {"$in": message_types}})
+
+    if not message_record:
+        raise ValueError("No message found for the given message type.")
+
+    # Create message data tuple
+    title = message_record['title']
+    content_template = message_record['content_template']
+    message_type = message_record['message_type']
+    message_data = (title, content_template, message_type)
+
+    return message_data, employee_data
