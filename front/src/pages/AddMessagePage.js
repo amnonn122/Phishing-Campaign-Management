@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
+import axios from 'axios';  // Ensure axios is installed and imported
 
 function AddMessagePage() {
   const [messageType, setMessageType] = useState('');
   const [messageTitle, setMessageTitle] = useState('');
   const [messageContent, setMessageContent] = useState('');
 
-  const submitMessage = (e) => {
+  const submitMessage = async (e) => {
     e.preventDefault();
-    const newWindow = window.open("", "_blank", "width=400,height=300");
-    newWindow.document.write(`<h1 style="font-family: Arial; color: #2c3e50;">Message Summary</h1>`);
-    newWindow.document.write(`<p><strong>Message Type:</strong> ${messageType}</p>`);
-    newWindow.document.write(`<p><strong>Message Title:</strong> ${messageTitle}</p>`);
-    newWindow.document.write(`<p><strong>Message Content:</strong> ${messageContent}</p>`);
 
-    // ניקוי שדות לאחר שליחה
+    // Prepare message data
+    const messageData = {
+      title: messageTitle,
+      content: messageContent,
+      message_type: messageType
+    };
+
+    // Send POST request to add the message
+    try {
+      await axios.post('http://localhost:5000/messages', messageData);  // Adjust the URL if necessary
+      alert("Message added successfully!");
+    } catch (error) {
+      console.error("There was an error adding the message:", error);
+      alert("Failed to add the message.");
+    }
+
+    // Clear form fields after submission
     setMessageType('');
     setMessageContent('');
     setMessageTitle('');
@@ -58,7 +70,7 @@ function AddMessagePage() {
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box', height: '120px' }}
           />
         </div>
-        <button type="submit" style={{ padding: '10px 20px', cursor: 'pointer' }}>Submit and Open Message</button>
+        <button type="submit" style={{ padding: '10px 20px', cursor: 'pointer' }}>Submit Message</button>
       </form>
     </div>
   );

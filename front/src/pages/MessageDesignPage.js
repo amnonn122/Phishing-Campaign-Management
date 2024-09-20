@@ -1,17 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function MessageDesignPage() {
   const [recipients, setRecipients] = useState([]);
-  const navigate = useNavigate(); 
+  const [messageTypes, setMessageTypes] = useState([]);
+  const [selectedMessageType, setSelectedMessageType] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Load recipients from localStorage
     const storedRecipients = JSON.parse(localStorage.getItem('selectedRecipients')) || [];
     setRecipients(storedRecipients);
+
+    // Fetch message types from the backend
+    const fetchMessageTypes = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/message-types');  // Adjust URL if needed
+        console.log('Fetched message types:', response.data); // Debugging
+        setMessageTypes(response.data);
+      } catch (error) {
+        console.error("Error fetching message types:", error);
+      }
+    };
+
+    fetchMessageTypes();
   }, []);
 
-  const sendMessage = () => {
-    navigate('/'); 
+  const sendMessage = async () => {
+    try {
+      console.log('Selected message type:', selectedMessageType); // Debugging
+
+      // Call backend to send emails
+      const response = await axios.post('http://localhost:5000/send-emails', {
+        user_names: recipients,
+        message_types: [selectedMessageType]
+      });
+
+      if (response.data.success) {
+        alert("Emails sent successfully!");
+      } else {
+        alert("Failed to send emails.");
+      }
+
+      // Navigate back to the main page
+      navigate('/');
+    } catch (error) {
+      console.error("Error sending emails:", error);
+      alert("An error occurred while sending emails.");
+    }
   };
 
   return (
@@ -29,10 +66,19 @@ function MessageDesignPage() {
       </div>
       <div className="box">
         <label htmlFor="messageType">Choose Message Type:</label>
-        <select id="messageType" className="dropdown">
-          <option value="typeA">Type A</option>
-          <option value="typeB">Type B</option>
-          <option value="typeC">Type C</option>
+        <select
+          id="messageType"
+          className="dropdown"
+          value={selectedMessageType}
+          onChange={(e) => {
+            console.log('Changed message type:', e.target.value); // Debugging
+            setSelectedMessageType(e.target.value);
+          }}
+        >
+          <option value="" disabled>Select a message type</option> {/* Default option */}
+          {messageTypes.map((type, index) => (
+            <option key={index} value={type}>{type}</option>
+          ))}
         </select>
       </div>
       <button className="btn" onClick={sendMessage}>Send and Return to Main</button>
