@@ -18,7 +18,7 @@ function AddMessagePage() {
 
     // Send POST request to add the message
     try {
-      await axios.post('http://localhost:5000/messages', messageData);  // Adjust the URL if necessary
+      await axios.post(`${process.env.REACT_APP_API_URL}/messages`, messageData);  // Adjust the URL if necessary
       alert("Message added successfully!");
     } catch (error) {
       console.error("There was an error adding the message:", error);

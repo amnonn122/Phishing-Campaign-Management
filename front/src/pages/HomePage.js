@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // ייבוא axios
+import axios from 'axios';
 import './homepage.css';
 
 function HomePage() {
@@ -21,26 +21,24 @@ function HomePage() {
     navigate('/add-message');
   };
 
-  // State to manage selected recipients and recipients fetched from the API
   const [selectedRecipients, setSelectedRecipients] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [recipients, setRecipients] = useState([]); // State עבור רשימת העובדים
+  const [recipients, setRecipients] = useState([]); 
 
-  // שימוש ב-useEffect כדי למשוך את שמות העובדים מה-DB כאשר הקומפוננטה נטענת
   useEffect(() => {
-    // שליפת הנתונים מה-API
-    axios.get('http://localhost:5000/employees') // הנח שה-API שלך רץ על פורט 5000
+    console.log(process.env.REACT_APP_API_URL); 
+    axios.get(`${process.env.REACT_APP_API_URL}/employees`) 
       .then(response => {
         const employees = response.data.map(employee => ({
           value: employee.name,
           label: employee.name
         }));
-        setRecipients(employees); // עדכון ה-state עם רשימת העובדים
+        setRecipients(employees); 
       })
       .catch(error => {
         console.error('Error fetching employees:', error);
       });
-  }, []); // הפונקציה תורץ פעם אחת כשיש טעינה
+  }, []); 
 
   const handleRecipientChange = (event) => {
     const { options } = event.target;

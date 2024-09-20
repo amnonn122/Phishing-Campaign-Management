@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // ייבוא useNavigate
+import { useNavigate } from 'react-router-dom'; 
 
 function AddEmployeePage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate(); // יצירת משתנה ניווט
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // שליחה לשרת Flask בכתובת הנכונה
-      const response = await axios.post('http://localhost:5000/employees', { name, email });
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/employees`, { name, email });
 
       alert('Employee added successfully');
 
-      // ניקוי השדות לאחר ההוספה
       setName('');
       setEmail('');
       setError(null);
 
-      // ניווט ל-HomePage אחרי הוספה מוצלחת
       navigate('/');
     } catch (error) {
       console.error(error);

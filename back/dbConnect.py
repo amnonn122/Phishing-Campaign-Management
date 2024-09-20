@@ -63,40 +63,23 @@ def setDB(employee_data, message_data):
     # Step 8: Clear any existing data in the 'messages' collection (optional)
     message_collection.delete_many({})
 
-    # Step 9: Prepare and insert message data into MongoDB with the placeholder {name}
+    # Step 9: Prepare and insert message data into MongoDB without looping over employees
     message_records = []
     for title, content_function, message_type in message_data:
-        # Store the content template with {name} as the placeholder
-        content_template = content_function("{name}")
+        # We do not need to create a message for each employee here.
+        # Just store the content template as is.
         message_records.append({
             "title": title,
-            "content_template": content_template,  # Store the template with the placeholder
-            "message_type": message_type  # Store the provided message type
+            "content_template": content_function("{name}", "{email}"),  # Use placeholders for name and email
+            "message_type": message_type
         })
 
     # Step 10: Insert the records into the 'messages' collection
     message_collection.insert_many(message_records)
     print(f"Inserted {len(message_records)} message records into the 'messages' collection.")
 
-
-
-def increment_phishing_count(name):
-    """
-    Increment the phishing count for a user by 1.
-
-    Parameters:
-    name (str): The name of the employee.
-    """
-    collection = connect_db()
-    # Increment the phishing_count field for the specified employee
-    result = collection.update_one(
-        {"name": name},
-        {"$inc": {"phishing_count": 1}}
-    )
-    if result.matched_count:
-        print(f"Incremented phishing count for {name}.")
-    else:
-        print(f"No employee found with name {name}.")
+    # Creating new click table
+    db['clicks']
 
 
 def get_names_by_phishing_count():
