@@ -16,7 +16,7 @@ function MessageDesignPage() {
     // Fetch message types from the backend
     const fetchMessageTypes = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/message-types');  // Adjust URL if needed
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/message-types`);  // Adjust URL if needed
         console.log('Fetched message types:', response.data); // Debugging
         setMessageTypes(response.data);
       } catch (error) {
@@ -32,7 +32,7 @@ function MessageDesignPage() {
       console.log('Selected message type:', selectedMessageType); // Debugging
 
       // Call backend to send emails
-      const response = await axios.post('http://localhost:5000/send-emails', {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/send-emails`, {
         user_names: recipients,
         message_types: [selectedMessageType]
       });

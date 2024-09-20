@@ -1,13 +1,16 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from pymongo import MongoClient
 from bson.json_util import dumps
 from flask_cors import CORS
+from datetime import datetime
 
-from back.dbConnect import getMessageAndEmployeeData, setDB
-from back.sendEmail import send_emails_to_employees
+from dbConnect import getMessageAndEmployeeData, setDB
+from sendEmail import send_emails_to_employees
 
 app = Flask(__name__)
 CORS(app)
+
+phishing_url = "http://10.100.102.17:5000/phishing-click?email=" #CHANGE TO GLOBAL VAR
 
 # Connecting to MongoDB
 client = MongoClient("mongodb://localhost:27017/")
@@ -21,7 +24,6 @@ def get_employees():
     employees = employees_collection.find()
     return dumps(employees)
 
-
 # Add a new employee (POST)
 @app.route('/employees', methods=['POST'])
 def add_employee():
@@ -30,7 +32,6 @@ def add_employee():
     email = data.get('email')
     employees_collection.insert_one({"name": name, "email": email, "phishing_count": 0})
     return jsonify({"message": "Employee added successfully"}), 201
-
 
 # Increment phishing_count (PATCH)
 @app.route('/employees/<name>/increment', methods=['PATCH'])
@@ -41,10 +42,8 @@ def increment_phishing_count(name):
     else:
         return jsonify({"message": f"Employee {name} not found"}), 404
 
-
 # Messages collection
 messages_collection = db['messages']
-
 
 # Add a new message (POST)
 @app.route('/messages', methods=['POST'])
@@ -63,32 +62,28 @@ def add_message():
 
     return jsonify({"message": "Message added successfully"}), 201
 
-
 # Add a route to fetch message types (GET)
 @app.route('/message-types', methods=['GET'])
 def get_message_types():
     message_types = messages_collection.distinct('message_type')  # Fetch distinct message types from the DB
     return jsonify(message_types), 200
 
-
 @app.route('/send-emails', methods=['POST'])
 def send_emails():
     try:
         data = request.json
-        print (data)
-
         user_names = data['user_names']
         message_types = data['message_types']
-        print (message_types)
+
         # Retrieve message_data and employee_data
         message_data, employee_data = getMessageAndEmployeeData(user_names, message_types)
 
-        # Retrieve email credentials from environment or config (for example)
+        # Retrieve email credentials from environment or config
         from_email = "bguminiproject@gmail.com"
         password = "aoamngkprfukvoif"
 
-        # Send emails to employees
-        send_emails_to_employees(message_data, employee_data, from_email, password)
+        # Send emails to employees with customized content
+        send_emails_to_employees(message_data[0], message_data[1], employee_data, from_email, password)
 
         return jsonify({"success": True}), 200
     except Exception as e:
@@ -96,13 +91,58 @@ def send_emails():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@app.route('/phishing-click', methods=['GET'])
+def handle_phishing_click():
+    email = request.args.get('email')  # Get the email from the query parameters
+    
+    if email and email != "{email}":  # Make sure it's not the placeholder
+        # Check if the email exists in the database
+        employee = employees_collection.find_one({"email": email})
+        
+        if employee:
+            # Save the click information in the database
+            db['clicks'].insert_one({
+                "email": email,
+                "timestamp": datetime.now()
+            })
+            
+            # Increment the phishing_count for the employee
+            employees_collection.update_one({"email": email}, {"$inc": {"phishing_count": 1}})
+            
+            # Redirect to YouTube
+            return redirect("https://www.youtube.com") 
+        else:
+            return jsonify({"message": "Employee not found"}), 404
+    else:
+        return jsonify({"message": "Email parameter is missing or incorrect"}), 400
+
 if __name__ == '__main__':
     employees = [
-        ["Bar Shuv", "barsh2001@gmail.com"],
+        ["Amnon Abaev", "amnonn122@gmail.com"],
+        ["Yam Peer", "yamitpeer@gmail.com"],
     ]
 
     messages = [
-        ("aa55aa", lambda name: f"sdgdfhgfh {name}.", "fish55")
+        ("Urgent: Update Your Information", 
+         lambda name, email: f"Hi {name}, please click HERE: <a href='{phishing_url}{email}'>HERE</a> to update your information as soon as possible!", 
+         "urgent_update"),
+         
+        ("Account Verification", 
+         lambda name, email: f"Hello {name}, please verify your account by clicking HERE: <a href='{phishing_url}{email}'>HERE</a>.", 
+         "account_verification"),
+         
+        ("Congratulations: You've Won!", 
+         lambda name, email: f"Congratulations {name}! You've won our prize. Click HERE: <a href='{phishing_url}{email}'>HERE</a> to claim your prize.", 
+         "prize_claim"),
+         
+        ("Warning: Account Issue", 
+         lambda name, email: f"Hello {name}, there is an issue with your account. Click HERE: <a href='{phishing_url}{email}'>HERE</a> to resolve it.", 
+         "account_issue"),
+         
+        ("Invitation to Upgrade Your Account", 
+         lambda name, email: f"Hi {name}, we are offering an upgrade for your account. Click HERE: <a href='{phishing_url}{email}'>HERE</a> for more information.", 
+         "account_upgrade"),
     ]
+
     setDB(employees, messages)
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
