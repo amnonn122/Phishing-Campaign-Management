@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import useIP from './ipGetter'; 
 
+/**
+ * Component for designing and sending messages to recipients.
+ */
 function MessageDesignPage() {
+  /**
+   * States for managing recipients, message types, and the selected message type.
+   */
   const [recipients, setRecipients] = useState([]);
   const [messageTypes, setMessageTypes] = useState([]);
   const [selectedMessageType, setSelectedMessageType] = useState('');
   const navigate = useNavigate();
+  const ipv4 = useIP(); 
 
+  /**
+   * Fetch recipients from local storage and message types from the server.
+   */
   useEffect(() => {
-    // Load recipients from localStorage
     const storedRecipients = JSON.parse(localStorage.getItem('selectedRecipients')) || [];
     setRecipients(storedRecipients);
 
-    // Fetch message types from the backend
     const fetchMessageTypes = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/message-types`);  // Adjust URL if needed
-        console.log('Fetched message types:', response.data); // Debugging
+        const response = await axios.get(`http://${ipv4}:5000/message-types`);
         setMessageTypes(response.data);
       } catch (error) {
         console.error("Error fetching message types:", error);
@@ -25,25 +33,18 @@ function MessageDesignPage() {
     };
 
     fetchMessageTypes();
-  }, []);
+  }, [ipv4]);
 
+  /**
+   * Sends the selected message to the chosen recipients.
+   */
   const sendMessage = async () => {
     try {
-      console.log('Selected message type:', selectedMessageType); // Debugging
-
-      // Call backend to send emails
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/send-emails`, {
+      await axios.post(`http://${ipv4}:5000/send-emails`, {
         user_names: recipients,
         message_types: [selectedMessageType]
       });
-
-      if (response.data.success) {
-        alert("Emails sent successfully!");
-      } else {
-        alert("Failed to send emails.");
-      }
-
-      // Navigate back to the main page
+      alert("Emails sent successfully!");
       navigate('/');
     } catch (error) {
       console.error("Error sending emails:", error);
@@ -70,12 +71,9 @@ function MessageDesignPage() {
           id="messageType"
           className="dropdown"
           value={selectedMessageType}
-          onChange={(e) => {
-            console.log('Changed message type:', e.target.value); // Debugging
-            setSelectedMessageType(e.target.value);
-          }}
+          onChange={(e) => setSelectedMessageType(e.target.value)}
         >
-          <option value="" disabled>Select a message type</option> {/* Default option */}
+          <option value="" disabled>Select a message type</option>
           {messageTypes.map((type, index) => (
             <option key={index} value={type}>{type}</option>
           ))}

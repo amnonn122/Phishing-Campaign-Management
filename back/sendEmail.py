@@ -1,46 +1,74 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import os
+from configIp import ipv4_address
 
-# Function to email a single recipient
-def send_email_to_one(server, from_email, to_email, subject, body):
-    try:
-        # Ensure the body is a string
-        if isinstance(body, list):
-            body = ''.join(body)  # Convert list to string if needed
-        elif not isinstance(body, str):
-            body = str(body)  # Ensure body is always a string
+# The phising URL that will be in the messages
+phishing_url = f"http://{ipv4_address}:5000/phishing-click?email="
 
-        # Create MIME object
-        msg = MIMEMultipart()
-        msg['From'] = from_email
-        msg['To'] = to_email
-        msg['Subject'] = subject
+def get_from_email():
+    """
+    Reads the email details from a text file in the main directory.
 
-        # Attach the email body in HTML format
-        msg.attach(MIMEText(body, 'html'))
+    Returns:
+        tuple: (from_email, password) read from the file.
+    """
+    credentials_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fromEmailDetails.txt')
+    
+    # קריאת הקובץ וקבלת המייל והסיסמה
+    with open(credentials_path, 'r') as file:
+        lines = file.readlines()
+        from_email = lines[0].split(':')[1].strip()  # email in the first line
+        password = lines[1].split(':')[1].strip()    # password in the second line
+    return from_email, password
 
-        # Send the email
-        text = msg.as_string()
-        server.sendmail(from_email, to_email, text)
+def send_emails_to_employees(subjects, contents, employees):
+    """
+    Sends emails to employees with the given subjects and contents in HTML format.
 
-        print(f"Email sent successfully to {to_email}!")
-    except Exception as e:
-        print(f"Failed to send email to {to_email}. Error: {e}")
+    Parameters:
+        subjects (list): A list of email subjects to send.
+        contents (list): A list of email bodies to send (in HTML format).
+        employees (list): A list of employee dictionaries, each containing 'name' and 'email'.
 
-# Send emails to a list of employees with personalized messages
-def send_emails_to_employees(title, content, employee_data, from_email, password):
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()  # Encrypt connection
-        server.login(from_email, password)
+    Returns:
+        None
+    """
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
 
-        for name, email in employee_data:
-            # Replace {name} in the content with the actual employee name
-            personalized_content = content.replace("{name}", name).replace("{email}", email)
+    # Getting the from_email details
+    from_email, password = get_from_email()
 
-            send_email_to_one(server, from_email, email, title, personalized_content)
+    # Create SMTP session
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()  # Enable security
+    server.login(from_email, password)
 
-        server.quit()
-    except Exception as e:
-        print(f"Error while sending emails: {e}")
+    for subject, content in zip(subjects, contents):
+        for employee in employees:
+            name = employee['name']
+            to_email = employee['email']
+
+            # Create the email message
+            msg = MIMEMultipart()
+            msg['From'] = from_email
+            msg['To'] = to_email
+            msg['Subject'] = subject
+
+            # Replace placeholders in content
+            personalized_content = content.replace("{name}", name).replace("{email}", to_email).replace("{phishing_url}", phishing_url)
+
+            # Attach the personalized content as HTML
+            msg.attach(MIMEText(personalized_content, 'html'))
+
+            # Send the email
+            try:
+                server.sendmail(from_email, to_email, msg.as_string())
+                print(f"Email sent to {name} at {to_email}")
+            except Exception as e:
+                print(f"Failed to send email to {name} at {to_email}: {e}")
+
+    # Terminate the SMTP session
+    server.quit()

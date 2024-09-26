@@ -1,30 +1,42 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; 
+import useIP from './ipGetter';  
 
+/**
+ * Component to add new employees to the system.
+ */
 function AddEmployeePage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState(null);
+  /**
+   * States to hold employee name & email and to handle errors
+   */ 
+  const [name, setName] = useState(''); 
+  const [email, setEmail] = useState('');  
+  const [error, setError] = useState(null);  
+  const navigate = useNavigate(); 
+  const ipv4 = useIP(); 
 
-  const navigate = useNavigate();
-
+  /**
+   * Handles form submission to add a new employee.
+   */
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
+    e.preventDefault(); 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/employees`, { name, email });
-
-      alert('Employee added successfully');
-
-      setName('');
-      setEmail('');
-      setError(null);
-
-      navigate('/');
+      if (ipv4) {
+        // Post new employee data to the backend API
+        await axios.post(`http://${ipv4}:5000/employees`, { name, email });
+        alert('Employee added successfully'); 
+        // Reset the form fields
+        setName('');
+        setEmail('');
+        setError(null);
+        navigate('/'); // Redirect to the home page
+      } else {
+        setError('Failed to retrieve server IP'); // Handle error if IP retrieval fails
+      }
     } catch (error) {
       console.error(error);
-      setError(error.response?.data?.message || 'Failed to add employee');
+      setError(error.response?.data?.message || 'Failed to add employee'); // Set error message
     }
   };
 
@@ -38,7 +50,7 @@ function AddEmployeePage() {
             type="text"
             id="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)} 
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           />
@@ -49,7 +61,7 @@ function AddEmployeePage() {
             type="email"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)} 
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           />

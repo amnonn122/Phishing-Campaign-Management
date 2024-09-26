@@ -1,31 +1,42 @@
+// AddMessagePage.js
+
 import React, { useState } from 'react';
-import axios from 'axios';  // Ensure axios is installed and imported
+import axios from 'axios';
+import useIP from './ipGetter'; 
 
+/**
+ * Component to create and submit new messages.
+ */
 function AddMessagePage() {
-  const [messageType, setMessageType] = useState('');
-  const [messageTitle, setMessageTitle] = useState('');
-  const [messageContent, setMessageContent] = useState('');
+  /**
+   * States for message type, title and content
+   */
+  const [messageType, setMessageType] = useState(''); 
+  const [messageTitle, setMessageTitle] = useState(''); 
+  const [messageContent, setMessageContent] = useState(''); 
+  const ipv4 = useIP(); 
 
+  /**
+   * Handles message submission to the backend.
+   */
   const submitMessage = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission behavior
 
-    // Prepare message data
     const messageData = {
       title: messageTitle,
       content: messageContent,
-      message_type: messageType
+      message_type: messageType // Collect message data
     };
 
-    // Send POST request to add the message
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/messages`, messageData);  // Adjust the URL if necessary
-      alert("Message added successfully!");
+      await axios.post(`http://${ipv4}:5000/messages`, messageData); // Post data to the backend
+      alert("Message added successfully!"); // Notify the user of success
     } catch (error) {
-      console.error("There was an error adding the message:", error);
-      alert("Failed to add the message.");
+      console.error("Error adding message:", error);
+      alert("Failed to add the message."); // Notify the user of failure
     }
 
-    // Clear form fields after submission
+    // Reset form fields after submission
     setMessageType('');
     setMessageContent('');
     setMessageTitle('');
@@ -41,7 +52,7 @@ function AddMessagePage() {
             type="text"
             id="messageType"
             value={messageType}
-            onChange={(e) => setMessageType(e.target.value)}
+            onChange={(e) => setMessageType(e.target.value)} 
             placeholder="Enter message type..."
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
@@ -53,7 +64,7 @@ function AddMessagePage() {
             type="text"
             id="messageTitle"
             value={messageTitle}
-            onChange={(e) => setMessageTitle(e.target.value)}
+            onChange={(e) => setMessageTitle(e.target.value)} 
             placeholder="Enter message title..."
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
@@ -64,7 +75,7 @@ function AddMessagePage() {
           <textarea
             id="messageContent"
             value={messageContent}
-            onChange={(e) => setMessageContent(e.target.value)}
+            onChange={(e) => setMessageContent(e.target.value)} 
             placeholder="Enter message content..."
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box', height: '120px' }}
