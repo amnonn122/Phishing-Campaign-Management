@@ -1,5 +1,2 @@
 # Default ignored files
-back/venv/
-back/__pycache__/
 front/node_modules/
-.vscode/
