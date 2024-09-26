@@ -1,4 +1,4 @@
-﻿# Phishing-Campaign-Management
+﻿# Phishing Campaign Management System
 
 This project is a full-stack solution for managing phishing campaigns. It includes both a backend (written in Python) and a frontend (using React). The backend manages email sending, MongoDB database connections, and tracks results, while the frontend provides a user-friendly interface for managing the campaign.
 
