@@ -1,6 +1,11 @@
 from pymongo import MongoClient
 from sendEmail import get_from_email
 
+client = MongoClient("mongodb://localhost:27017/")
+db = client['companyDB']
+employees_collection = db['employees']
+messages_collection = db['messages']
+
 def set_DB(employee_data, message_data):
     """
     Initialize the MongoDB database with employee and message data.
@@ -9,21 +14,16 @@ def set_DB(employee_data, message_data):
     employee_data (list of list): Each inner list contains employee name and email.
     message_data (list of tuple): Each tuple contains message title, content function, and message type.
     """
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['companyDB']
-    employee_collection = db['employees']
-
     # Clear existing employee data
-    employee_collection.delete_many({})
+    employees_collection.delete_many({})
 
     # Insert employee data with phishing_count initialized to 0
     employee_records = [{"name": name, "email": email, "phishing_count": 0} for name, email in employee_data]
-    employee_collection.insert_many(employee_records)
-    print(f"Inserted {len(employee_records)} employee records.")
+    employees_collection.insert_many(employee_records)
+    print(f"Inserted {len(employee_records)} employees records.")
 
     # Prepare messages collection
-    message_collection = db['messages']
-    message_collection.delete_many({})  # Clear existing messages
+    messages_collection.delete_many({})  # Clear existing messages
 
     # Insert message data
     message_records = [{
@@ -32,8 +32,8 @@ def set_DB(employee_data, message_data):
         "message_type": message_type
     } for title, content_function, message_type in message_data]
 
-    message_collection.insert_many(message_records)
-    print(f"Inserted {len(message_records)} message records.")
+    messages_collection.insert_many(message_records)
+    print(f"Inserted {len(message_records)} messages records.")
 
     # Create new clicks collection
     db['clicks']
@@ -55,10 +55,6 @@ def get_message_and_employee_data(user_names, message_types):
             - Message titles and content.
             - Corresponding employee data.
     """
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['companyDB']
-    employees_collection = db['employees']
-    messages_collection = db['messages']
 
     # Fetch employee details
     employee_data = list(employees_collection.find({"name": {"$in": user_names}}))

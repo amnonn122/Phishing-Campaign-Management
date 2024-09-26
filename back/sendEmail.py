@@ -16,12 +16,29 @@ def get_from_email():
     """
     credentials_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fromEmailDetails.txt')
     
-    # קריאת הקובץ וקבלת המייל והסיסמה
     with open(credentials_path, 'r') as file:
         lines = file.readlines()
         from_email = lines[0].split(':')[1].strip()  # email in the first line
         password = lines[1].split(':')[1].strip()    # password in the second line
     return from_email, password
+
+import os
+
+def get_smtp_details():
+    """
+    Reads the SMTP server and port details from a text file in the main directory.
+
+    Returns:
+        tuple: (smtp_server, smtp_port) read from the file.
+    """
+    credentials_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fromEmailDetails.txt')
+    
+    with open(credentials_path, 'r') as file:
+        lines = file.readlines()
+        smtp_server = lines[2].split(':')[1].strip()  # SMTP server in the 3 line
+        smtp_port = int(lines[3].split(':')[1].strip())  # SMTP port in the 4 line
+    return smtp_server, smtp_port
+
 
 def send_emails_to_employees(subjects, contents, employees):
     """
@@ -35,8 +52,8 @@ def send_emails_to_employees(subjects, contents, employees):
     Returns:
         None
     """
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
+    # Getting the SMTP server and port details
+    smtp_server, smtp_port = get_smtp_details()
 
     # Getting the from_email details
     from_email, password = get_from_email()

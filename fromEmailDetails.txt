@@ -1,2 +1,4 @@
 from_email: bguminiproject@gmail.com
 password: aoamngkprfukvoif
+smtp_server: smtp.gmail.com
+smtp_port: 587
