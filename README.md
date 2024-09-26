@@ -22,6 +22,12 @@ The frontend is a React-based web interface for interacting with the backend. Ke
   - **ipGetter.js** – Retrieves the current server IP.
   - **AddMessagePage.js** – Page for creating phishing messages. When adding a message, you can dynamically insert the recipient's name and phishing URL. For example:
     `Hi {name}, we are offering an upgrade for your account. Click <a href='{phishing_url}{email}'>HERE</a> for more information.`
+    **Important Note for Adding Phishing Messages:**
+    To ensure that phishing emails sent through the system correctly track user clicks, **you must include the combination of `{phishing_url}{email}`** in the message link when adding a new phishing message template.
+
+    The `{phishing_url}` is dynamically generated and contains the necessary tracking link, while `{email}` corresponds to the recipient's email address. This combination is essential for the system to associate the click with the correct user and increment their phishing count.
+
+    Failing to use this exact combination may result in the phishing attempt not being recorded properly.
 
 ## Setup Instructions
 

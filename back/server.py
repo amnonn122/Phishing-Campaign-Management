@@ -189,7 +189,7 @@ def send_warning_email():
             return jsonify({"success": False, "error": "Email and name are required"}), 400
         
         subject = "Warning: Phishing Attempt Detected"
-        content = f"Dear {name},\n\nYou have fallen for a phishing attempt. Please be cautious in the future!\n\nBest regards,\nYour Security Team"
+        content = f"Dear {name},<br>You have fallen for a phishing attempt. <br>Please be cautious in the future! <br>Best regards,<br>Your Security Team"
         
         # Sending the warning email using the existing function
         send_emails_to_employees([subject], [content], [{'name': name, 'email': email}])
@@ -238,24 +238,24 @@ if __name__ == '__main__':
 
     messages = [
         ("Urgent: Update Your Information", 
-         lambda name, email, phishing_url: f"Hi {name}, please click <a href='{phishing_url}{email}'>HERE</a> to update your information as soon as possible!", 
-         "urgent_update"),
-         
+        "Hi {name},<br>Please click <a href='{phishing_url}{email}'>HERE</a> to update your information as soon as possible!<br>Best regards,<br>Your Security Team", 
+        "urgent_update"),
+        
         ("Account Verification", 
-         lambda name, email, phishing_url: f"Hello {name}, please verify your account by clicking <a href='{phishing_url}{email}'>HERE</a>.", 
-         "account_verification"),
-         
+        "Hello {name},<br>Please verify your account by clicking <a href='{phishing_url}{email}'>HERE</a>.<br>Best regards,<br>Your Security Team", 
+        "account_verification"),
+        
         ("Congratulations: You've Won!", 
-         lambda name, email, phishing_url: f"Congratulations {name}! You've won our prize. Click <a href='{phishing_url}{email}'>HERE</a> to claim your prize.", 
-         "prize_claim"),
-         
+        "Congratulations {name}!<br>You've won our prize. Click <a href='{phishing_url}{email}'>HERE</a> to claim your prize.<br>Best regards,<br>Your Security Team", 
+        "prize_claim"),
+        
         ("Warning: Account Issue", 
-         lambda name, email, phishing_url: f"Hello {name}, there is an issue with your account. Click <a href='{phishing_url}{email}'>HERE</a> to resolve it.", 
-         "account_issue"),
-         
+        "Hello {name},<br>There is an issue with your account. Click <a href='{phishing_url}{email}'>HERE</a> to resolve it.<br>Best regards,<br>Your Security Team", 
+        "account_issue"),
+        
         ("Invitation to Upgrade Your Account", 
-         lambda name, email, phishing_url: f"Hi {name}, we are offering an upgrade for your account. Click <a href='{phishing_url}{email}'>HERE</a> for more information.", 
-         "account_upgrade"),
+        "Hi {name},<br>We are offering an upgrade for your account. Click <a href='{phishing_url}{email}'>HERE</a> for more information.<br>Best regards,<br>Your Security Team", 
+        "account_upgrade"),
     ]
     set_DB(employees, messages)
 

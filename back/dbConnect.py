@@ -28,9 +28,9 @@ def set_DB(employee_data, message_data):
     # Insert message data
     message_records = [{
         "title": title,
-        "content_template": content_function("{name}", "{email}", "{phishing_ur}"),
+        "content_template": content_template,
         "message_type": message_type
-    } for title, content_function, message_type in message_data]
+    } for title, content_template, message_type in message_data]
 
     messages_collection.insert_many(message_records)
     print(f"Inserted {len(message_records)} messages records.")
