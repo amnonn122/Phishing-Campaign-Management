@@ -7,6 +7,10 @@ import MessageDesignPage from './pages/MessageDesignPage.js';
 import AddEmployeePage from './pages/AddEmployeePage';
 import WhoFellPage from './pages/WhoFellPage.js';
 
+/**
+ * Main application component that sets up routing for the application.
+ * It uses React Router to define the different routes and their corresponding components.
+ */
 function App() {
   return (
     <Router>
