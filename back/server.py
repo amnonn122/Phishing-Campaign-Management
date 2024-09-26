@@ -232,8 +232,7 @@ def handle_phishing_click():
 if __name__ == '__main__':
     # Initializing the database
     employees = [
-        ["Amnon Abaev", "amnonn122@gmail.com"],
-        ["Yam Peer", "yamitpeer@gmail.com"],
+        ["Israel Israeli", "israel@israel.com"],
     ]
 
     messages = [
